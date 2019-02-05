@@ -1,4 +1,4 @@
-/* program returns number of hits per page of webserver */
+/*program returns number of hits per page of webserver */
 package main
 
 import (
