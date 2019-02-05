@@ -25,7 +25,8 @@ func incrementCounter(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	http.HandleFunc("/", echoString)
+	http.Handle("/", http.FileServer(http.Dir("./static")))
+	// http.HandleFunc("/", echoString)
 
 	http.HandleFunc("/increment", incrementCounter)
 
