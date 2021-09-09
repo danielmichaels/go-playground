@@ -39,10 +39,16 @@ func (s apiServer) Router() *mux.Router {
 	return s.router
 }
 
+func (s *apiServer) respondWithJSON(w http.ResponseWriter, i interface{}, status int) error {
+	e := data.ToJSON(i, w)
+	w.WriteHeader(status)
+	return e
+}
+
 func (s *apiServer) readAddressAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		addressBook := data.GetAddressBook()
-		err := data.ToJSON(addressBook, w)
+		err := s.respondWithJSON(w, &addressBook, http.StatusOK)
 		if err != nil {
 			http.Error(w, "Unable to marshal json", http.StatusInternalServerError)
 			return
@@ -58,8 +64,7 @@ func (s *apiServer) createAddress() http.HandlerFunc {
 			return
 		}
 		data.AddAddressToStore(&address)
-		w.WriteHeader(http.StatusCreated)
-		err = data.ToJSON(&address, w)
+		err = s.respondWithJSON(w, &address, http.StatusCreated)
 	}
 }
 
@@ -82,7 +87,7 @@ func (s *apiServer) updateAddress() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		err = data.ToJSON(&address, w)
+		err = s.respondWithJSON(w, &address, http.StatusOK)
 	}
 }
 
@@ -95,7 +100,7 @@ func (s *apiServer) readAddress() http.HandlerFunc {
 			return
 		}
 		result, _, _ := data.FindAddress(id)
-		err = data.ToJSON(&result, w)
+		err = s.respondWithJSON(w, &result, http.StatusOK)
 	}
 }
 func (s *apiServer) deleteAddress() http.HandlerFunc {
@@ -107,7 +112,7 @@ func (s *apiServer) deleteAddress() http.HandlerFunc {
 			return
 		}
 		deleteAddress := data.DeleteAddress(id)
-		err = data.ToJSON(&deleteAddress, w)
+		err = s.respondWithJSON(w, &deleteAddress, http.StatusNoContent)
 	}
 }
 func (s *apiServer) exportAddressToCSV() http.HandlerFunc {
