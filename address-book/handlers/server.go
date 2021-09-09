@@ -58,13 +58,31 @@ func (s *apiServer) createAddress() http.HandlerFunc {
 			return
 		}
 		data.AddAddressToStore(&address)
+		w.WriteHeader(http.StatusCreated)
 		err = data.ToJSON(&address, w)
 	}
 }
 
 func (s *apiServer) updateAddress() http.HandlerFunc {
+	var address data.AddressBook
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, _ = fmt.Fprint(w, "update am entry")
+		vars := mux.Vars(r)
+		id, err := strconv.Atoi(vars["id"])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		err = data.FromJSON(&address, r.Body)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		err = data.UpdateAddress(id, &address)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		err = data.ToJSON(&address, w)
 	}
 }
 
@@ -78,11 +96,6 @@ func (s *apiServer) readAddress() http.HandlerFunc {
 		}
 		result, _, _ := data.FindAddress(id)
 		err = data.ToJSON(&result, w)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
 	}
 }
 func (s *apiServer) deleteAddress() http.HandlerFunc {

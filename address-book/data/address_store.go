@@ -67,12 +67,25 @@ func FindAddress(id int) (*AddressBook, int, error) {
 	}
 	return nil, -1, ErrAddressNotFound
 }
+
+// DeleteAddress finds an address by its ID and removes it from the array
 func DeleteAddress(id int) error {
 	addr := findIndexByAddressID(id)
 	if addr == -1 {
 		return ErrAddressNotFound
 	}
 	AddressBookStore = append(AddressBookStore[:addr], AddressBookStore[addr+1])
+	return nil
+}
+
+// UpdateAddress finds an address by the passed in ID and updates the entry
+func UpdateAddress(id int, a *AddressBook) error {
+	_, idx, err := FindAddress(id)
+	if err != nil {
+		return ErrAddressNotFound
+	}
+	a.ID = id
+	AddressBookStore[idx] = a
 	return nil
 }
 
