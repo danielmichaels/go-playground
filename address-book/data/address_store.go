@@ -2,6 +2,7 @@ package data
 
 import (
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"time"
 )
 
@@ -10,36 +11,18 @@ var ErrAddressNotFound = fmt.Errorf("address not found")
 
 type AddressBook struct {
 	ID          int    `json:"id"`
-	FirstName   string `json:"first_name"`
-	LastName    string `json:"last_name"`
-	Email       string `json:"email"`
-	PhoneNumber int    `json:"phone_number,string"`
+	FirstName   string `json:"first_name" validate:"required"`
+	LastName    string `json:"last_name" validate:"required"`
+	Email       string `json:"email" validate:"required,email"`
+	PhoneNumber int    `json:"phone_number" validate:"required"`
 	CreatedON   string `json:"-"` // "-" omit from response
 	UpdatedON   string `json:"-"` // "-" omit from response
 	DeletedON   string `json:"-"` // "-" omit from response
 }
 
-var AddressBookStore = []*AddressBook{
-	{
-		ID:          1,
-		FirstName:   "Michael",
-		LastName:    "Jordan",
-		Email:       "twotrey@hornets.nba",
-		PhoneNumber: 23232323,
-		CreatedON:   time.Now().UTC().String(),
-		UpdatedON:   time.Now().UTC().String(),
-		DeletedON:   time.Now().UTC().String(),
-	},
-	{
-		ID:          2,
-		FirstName:   "Frank",
-		LastName:    "Herbert",
-		Email:       "frank@arrakis.com",
-		PhoneNumber: 12341234,
-		CreatedON:   time.Now().UTC().String(),
-		UpdatedON:   time.Now().UTC().String(),
-		DeletedON:   time.Now().UTC().String(),
-	},
+func (a *AddressBook) Validate() error {
+	validate := validator.New()
+	return validate.Struct(a)
 }
 
 // GetAddressBook is a helper which returns all the books in the store
@@ -100,4 +83,28 @@ func getNextID() int {
 func AddAddressToStore(a *AddressBook) {
 	a.ID = getNextID()
 	AddressBookStore = append(AddressBookStore, a)
+}
+
+// Initial values
+var AddressBookStore = []*AddressBook{
+	{
+		ID:          1,
+		FirstName:   "Michael",
+		LastName:    "Jordan",
+		Email:       "twotrey@hornets.nba",
+		PhoneNumber: 23232323,
+		CreatedON:   time.Now().UTC().String(),
+		UpdatedON:   time.Now().UTC().String(),
+		DeletedON:   time.Now().UTC().String(),
+	},
+	{
+		ID:          2,
+		FirstName:   "Frank",
+		LastName:    "Herbert",
+		Email:       "frank@arrakis.com",
+		PhoneNumber: 12341234,
+		CreatedON:   time.Now().UTC().String(),
+		UpdatedON:   time.Now().UTC().String(),
+		DeletedON:   time.Now().UTC().String(),
+	},
 }

@@ -40,8 +40,8 @@ func (s apiServer) Router() *mux.Router {
 }
 
 func (s *apiServer) respondWithJSON(w http.ResponseWriter, i interface{}, status int) error {
-	e := data.ToJSON(i, w)
 	w.WriteHeader(status)
+	e := data.ToJSON(i, w)
 	return e
 }
 
@@ -61,6 +61,15 @@ func (s *apiServer) createAddress() http.HandlerFunc {
 		err := data.FromJSON(&address, r.Body)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		err = address.Validate()
+		if err != nil {
+			http.Error(
+				w,
+				fmt.Sprintf("Unable to validate product: %s", err),
+				http.StatusBadRequest,
+			)
 			return
 		}
 		data.AddAddressToStore(&address)
