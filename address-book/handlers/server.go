@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/danielmichaels/address-book/data"
 	"github.com/gorilla/mux"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -45,6 +46,15 @@ func (s *apiServer) respondWithJSON(w http.ResponseWriter, i interface{}, status
 	return e
 }
 
+// validateAddress validate the address has the required json fields
+func (s apiServer) validateAddress(address data.AddressBook) error {
+	err := address.Validate()
+	if err != nil {
+		return fmt.Errorf("unable to validate address: %s", err)
+	}
+	return nil
+}
+
 func (s *apiServer) readAddressAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		addressBook := data.GetAddressBook()
@@ -63,11 +73,11 @@ func (s *apiServer) createAddress() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		err = address.Validate()
+		err = s.validateAddress(address)
 		if err != nil {
 			http.Error(
 				w,
-				fmt.Sprintf("Unable to validate product: %s", err),
+				fmt.Sprintf("%s", err),
 				http.StatusBadRequest,
 			)
 			return
@@ -86,11 +96,25 @@ func (s *apiServer) updateAddress() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+
 		err = data.FromJSON(&address, r.Body)
 		if err != nil {
+			log.Println(err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+
+		err = s.validateAddress(address)
+		if err != nil {
+			log.Println(err)
+			http.Error(
+				w,
+				fmt.Sprintf("%s", err),
+				http.StatusBadRequest,
+			)
+			return
+		}
+
 		err = data.UpdateAddress(id, &address)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)

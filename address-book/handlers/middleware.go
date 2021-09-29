@@ -18,7 +18,7 @@ func (s apiServer) jsonContentTypeMiddleware(next http.Handler) http.Handler {
 func (s apiServer) addressBookValidationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		addr := data.AddressBook{}
-		err := data.FromJSON(addr, r.Body)
+		err := data.FromJSON(&addr, r.Body)
 		if err != nil {
 			return
 		}

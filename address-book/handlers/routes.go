@@ -7,6 +7,7 @@ import (
 func (s *apiServer) routes() {
 	api := s.router.PathPrefix("/api").Subrouter()
 	api.Use(s.jsonContentTypeMiddleware)
+	//api.Use(s.addressBookValidationMiddleware)
 
 	api.HandleFunc("/address", s.readAddressAll()).Methods(http.MethodGet)
 	api.HandleFunc("/address", s.createAddress()).Methods(http.MethodPost)
